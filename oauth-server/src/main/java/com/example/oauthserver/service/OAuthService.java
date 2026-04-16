@@ -1,11 +1,13 @@
 package com.example.oauthserver.service;
 
+import com.example.oauthserver.dto.TokenResponse;
 import com.example.oauthserver.model.*;
 import com.example.oauthserver.repository.*;
 import com.example.oauthserver.util.TokenUtils;
-import com.example.oauthserver.dto.TokenResponse;
 import com.example.oauthserver.dto.UserInfo;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,10 +23,18 @@ public class OAuthService {
     private final RefreshTokenRepository refreshTokenRepo;
     private final AccessTokenRepository accessTokenRepo;
 
-    // Giả lập người dùng đã đăng nhập vào Auth Server (trong thực tế lấy từ SecurityContext)
-    // Ở đây ta hardcode user ID 1 cho đơn giản, hoặc bạn cần một cơ chế login riêng cho Project 2
+    // Lấy người dùng đã đăng nhập từ SecurityContext
     public User getCurrentlyLoggedInUser() {
-        return userRepo.findById(1L).orElseThrow(() -> new RuntimeException("User not logged in to Auth Server"));
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        String email;
+        if (principal instanceof UserDetails) {
+            email = ((UserDetails) principal).getUsername();
+        } else {
+            email = principal.toString();
+        }
+        
+        return userRepo.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found in session: " + email));
     }
 
     /**

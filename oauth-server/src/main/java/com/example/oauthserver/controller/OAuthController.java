@@ -6,9 +6,10 @@ import com.example.oauthserver.dto.UserInfo;
 import com.example.oauthserver.service.OAuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
-@RestController
+@Controller
 @RequestMapping("/oauth")
 @RequiredArgsConstructor
 public class OAuthController {
@@ -44,6 +45,7 @@ public class OAuthController {
 
     // Bước 4: Đổi code lấy token
     @PostMapping("/token")
+    @ResponseBody
     public ResponseEntity<?> getToken(@RequestBody TokenRequest request) {
         try {
             TokenResponse response;
@@ -71,6 +73,7 @@ public class OAuthController {
 
     // Bước 6: Lấy thông tin user
     @GetMapping("/userinfo")
+    @ResponseBody
     public ResponseEntity<?> getUserInfo(@RequestHeader("Authorization") String authHeader) {
         try {
             String token = authHeader.replace("Bearer ", "");
